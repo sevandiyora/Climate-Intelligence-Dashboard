@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            max-height: 100vh; /* Ensure the page fits the viewport */
+            background: linear-gradient(135deg, #1a1a1a, #333333);
+            color: #ffffff;
+            overflow: hidden; /* Prevent unnecessary scrolling */
+        }
+
+        /* Header Styling */
+        header {
+            width: 100%;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 30px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        header .head {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 30px;
+        }
+
+        header .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4d4d;
+        }
+
+        header nav ul {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        header nav ul li {
+            margin-left: 20px;
+        }
+
+        header nav ul li a {
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        header nav ul li a:hover {
+            color: #ff9900;
+        }
+
+        h1 {
+            color: #ff9900;
+            margin-bottom: 5px;
+        }
+
+        select, button {
+            padding: 8px 12px;
+            margin: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #444444;
+            color: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        select:hover, button:hover {
+            background-color: #555555;
+            transform: scale(1.03);
+        }
+
+        button {
+            font-size: 14px;
+            background-color: #ff9900;
+            color: #ffffff;
+        }
+
+        button:hover {
+            background-color: #e68a00;
+            transform: scale(1.05);
+        }
+
+        canvas {
+            max-width: 90%;
+            max-height: 60vh; /* Adjust max height of the chart */
+            background-color: #222222;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        #reset-button {
+            margin-top: 20px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #ff4d4d;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #reset-button:hover {
+            background-color: #e63939;
+            transform: scale(1.05);
+        }
+
+        .chart-controls {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 10px; /* Space between controls */
+            margin-bottom: 5px;
+        }
+
+        /*    footer styling */
+
+        footer {
+            background-color: #3a3f44;
+            color: #f0f0f0; /* Off-white color */
+            padding: 10px 0;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 400;
+            margin-top: auto; /* Ensures footer is at the bottom when content is scrolled */
+        }
+
+        footer p {
+            color: #f0f0f0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #e1e1e0;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+
+    </style>
+</head>
+<body>
+<header>
+    <div class="head">
+
+        <div class="logo">ClimaView</div>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/map">Explore Map</a></li>
+                <li><a href="/chart" class="active">View Charts</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<div style="width: 100%; height: calc(100vh - 50px); display: flex; flex-direction: column; align-items: center; overflow-y: auto;">
+    <h1>Weather Data Visualization</h1>
+    <div class="chart-controls">
+        <select id="city-select">
+            {% for city, station in cities.items() %}
+            <option value="{{ city }}">{{ city }}</option>
+            {% endfor %}
+        </select>
+        <select id="data-type-select">
+            <option value="temperature" selected>Temperature</option>
+            <option value="wind">Wind Speed</option>
+        </select>
+        <button id="update-button">Update Chart</button>
+    </div>
+    <canvas id="dataChart"></canvas>
+    <button id="reset-button">Reset Chart</button>
+</div>
+
+
+
+<script>
+    let dataChart;
+
+    function fetchAndRenderData(city, dataType) {
+        fetch(`/api/data?city=${city}&type=${dataType}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error fetching data:', data.error);
+                    return;
+                }
+
+                const labels = data.data.map(entry => new Date(entry.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    year: 'numeric'
+                }));
+                const values = data.data.map(entry => entry.value);
+
+                if (values.every(v => v === null)) {
+                    alert(`No ${dataType} data available for ${city}`);
+                    if (dataChart) dataChart.destroy();
+                    return;
+                }
+
+                if (dataChart) {
+                    dataChart.data.labels = labels;
+                    dataChart.data.datasets[0].data = values;
+                    dataChart.data.datasets[0].label = `${city} - ${dataType === 'wind' ? 'Wind Speed (km/h)' : 'Temperature (°C)'}`;
+                    dataChart.update();
+                } else {
+                    const ctx = document.getElementById('dataChart').getContext('2d');
+                    dataChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: `${city} - ${dataType === 'wind' ? 'Wind Speed (km/h)' : 'Temperature (°C)'}`,
+                                data: values,
+                                borderColor: 'rgba(255, 153, 0, 1)',
+                                backgroundColor: 'rgba(255, 153, 0, 0.2)',
+                                borderWidth: 2,
+                                pointRadius: 5,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: {color: '#ff9900'}
+                                },
+                                zoom: {
+                                    pan: {enabled: true, mode: 'x'},
+                                    zoom: {drag: {enabled: true}, mode: 'x'}
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+    }
+
+    document.getElementById('update-button').addEventListener('click', () => {
+        const city = document.getElementById('city-select').value;
+        const dataType = document.getElementById('data-type-select').value;
+        fetchAndRenderData(city, dataType);
+    });
+
+    document.getElementById('reset-button').addEventListener('click', () => {
+        if (dataChart) dataChart.resetZoom();
+    });
+
+    fetchAndRenderData('New York', 'temperature');
+</script>
+
+</body>
+</html>

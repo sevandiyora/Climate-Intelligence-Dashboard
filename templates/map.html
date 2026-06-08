@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climaview</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon_io/favicon-16x16.png') }}" type="image/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!--google fonts link for temperature -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Lato:wght@300&family=Lexend+Exa:wght@100..900&display=swap"
+          rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #3a3f44;
+            padding: 12px 30px;
+            color: white;
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header .title {
+            font-size: 26px;
+            font-family: 'Times New Roman', Times, serif;
+            color: #f0f0f0;
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+            font-weight: normal;
+        }
+
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        header nav ul li {
+            margin-left: 20px;
+        }
+
+        header nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: transform 0.3s ease;
+        }
+
+        header nav ul li a:hover {
+            transform: scale(1.05);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .leaflet-control-zoom {
+            position: absolute !important;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        footer a {
+            color: #FFD700;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Updated Popup Styling */
+        .leaflet-popup-content-wrapper {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .leaflet-popup-content {
+            font-size: 14px;
+            color: white;
+            padding: 15px;
+            line-height: 1.5;
+        }
+
+        .leaflet-popup-content .popup-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #ffcc00;
+            margin-bottom: 10px;
+        }
+
+        .leaflet-popup-content .popup-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .leaflet-popup-content .popup-line strong {
+            color: #ffffff;
+        }
+
+        .leaflet-popup-content .popup-line span {
+            color: #b0b0b0;
+        }
+
+        .leaflet-popup-tip {
+            background-color: #1e1e1e;
+        }
+
+        .popup-title {
+            font-weight: bold;
+            color: #fa4646; /* Bright yellow for the title */
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .popup-content-line {
+            margin: 4px 0;
+            color: #ecf0f1; /* Light gray for content lines */
+        }
+
+        .popup-content-line span {
+            font-weight: normal;
+            color: #bdc3c7; /* Light gray for the values */
+        }
+
+        .popup-container {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            color: #eaeaea;
+            line-height: 1.6;
+            width: 250px;
+        }
+
+        .popup-temperature {
+            font-family: "Lexend Exa", sans-serif;
+            font-weight: 350;
+            font-size: 28px;
+            color: #ff6f61; /* Neutral professional look */
+            margin-bottom: 5px;
+        }
+
+        .popup-description {
+            font-size: 16px;
+            color: #cccccc;
+            margin-bottom: 15px;
+        }
+
+        .popup-line {
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between; /* Ensures label and value align neatly */
+            margin: 5px 0;
+        }
+
+        .popup-label {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .popup-value {
+            color: #cccccc;
+        }
+
+        /* Toggle Button Styling */
+        .leaflet-control-custom button {
+            font-family: 'Roboto', sans-serif;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            padding: 10px 15px;
+            background-color: #3a3f44; /* Dark background */
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .leaflet-control-custom button:hover {
+            background-color: rgba(0, 91, 255, 0.98); /* Highlight color */
+            transform: scale(1.1); /* Slight zoom effect */
+        }
+
+        .leaflet-control-custom button:focus {
+            outline: none; /* Remove focus outline */
+            box-shadow: 0 0 4px #3d5d8a; /* Glow effect */
+        }
+
+        /* Header styles copied from the home page */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #1e1e1e;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        header .title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff6f61;
+        }
+
+        header nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+        }
+
+        header nav ul li {
+            font-size: 1rem;
+        }
+
+        header nav ul li a {
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="title">
+        Climaview
+    </div>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('about') }}" target="_blank">About</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div id="main-content">
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+
+    // Define light and dark tile layers
+    var lightMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+
+    var darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://carto.com/">CartoDB Dark Matter</a>'
+    });
+
+    // Initialize the map with the light theme
+    var map = L.map('map', {
+        center: [40.7178, -74.0431],
+        zoom: 13,
+        layers: [lightMap] // Default layer
+    });
+
+    // Add a custom button to toggle themes
+    var themeButton = L.control({position: 'bottomleft'});
+
+    themeButton.onAdd = function () {
+        var div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+        div.innerHTML = '<button id="theme-toggle">Switch to Dark</button>';
+
+        // Prevent map click events from being triggered when interacting with the button
+        L.DomEvent.disableClickPropagation(div);
+
+        return div;
+    };
+
+    themeButton.addTo(map);
+
+    // Theme toggle functionality
+    var isDark = false; // Flag to track the current theme
+
+    document.getElementById('theme-toggle').addEventListener('click', function () {
+        if (isDark) {
+            map.removeLayer(darkMap);
+            map.addLayer(lightMap);
+            this.innerHTML = 'Switch to Dark';
+        } else {
+            map.removeLayer(lightMap);
+            map.addLayer(darkMap);
+            this.innerHTML = 'Switch to Light';
+        }
+        isDark = !isDark;
+    });
+
+    var currentMarker = null;
+
+    map.on('click', function (e) {
+        var lat = e.latlng.lat;
+        var lon = e.latlng.lng;
+
+        if (currentMarker) {
+            map.removeLayer(currentMarker);
+        }
+
+        currentMarker = L.marker([lat, lon]).addTo(map);
+
+        fetch(`/get_weather_data?lat=${lat}&lon=${lon}`)
+            .then(response => response.json())
+            .then(data => {
+                var co2 = data.co2;
+                var temperature = data.temperature;
+                var seaLevel = data.sea_level;
+                var weatherDescription = data.weather_description;
+                var humidity = data.humidity;
+                var pressure = data.pressure;
+
+                currentMarker.bindPopup(`
+                    <div class="popup-container">
+                        <div class="popup-temperature">${data.temperature}°C</div>
+                        <div class="popup-description">${data.weather_description}</div>
+                        <div class="popup-line"><span class="popup-label">Sea Level:</span> <span class="popup-value">${data.sea_level} m</span></div>
+                        <div class="popup-line"><span class="popup-label">CO2 Level:</span> <span class="popup-value">${data.co2} µg/m³</span></div>
+                        <div class="popup-line"><span class="popup-label">Humidity:</span> <span class="popup-value">${data.humidity}%</span></div>
+                        <div class="popup-line"><span class="popup-label">Pressure:</span> <span class="popup-value">${data.pressure} hPa</span></div>
+                    </div>
+                `).openPopup();
+
+                // Add padding to ensure popup doesn't go behind the footer
+                var popup = currentMarker.getPopup();
+                var popupHeight = popup._contentNode.offsetHeight;
+                var mapHeight = map.getSize().y;
+                var mapBottom = map.getBounds().getSouth();
+
+                // Check if popup would go behind footer
+                if (popupHeight + 100 > mapHeight) {
+                    map.panBy([0, popupHeight + 20]); // Move the map down to ensure the popup is fully visible
+                }
+            })
+            .catch(err => console.error("Error fetching weather data:", err));
+    });
+
+</script>
+
+</body>
+</html>

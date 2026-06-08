@@ -1,0 +1,33 @@
+climate data app/
+│
+├── .venv/                          # Virtual environment directory
+│
+├── data/                           # Data files for the application
+│   └── GlobalLandTemperaturesByCity.csv
+│
+├── static/                         # Static files (CSS, JS, Images, etc.)
+│   ├── css/                        # CSS files directory
+│   ├── favicon_io/                 # Favicon files
+│   ├── images/                     # Image assets
+│   │   └── earth-background.jpg
+│   ├── js/                         # JavaScript files directory
+│   ├── random/                     # Additional assets or files
+│   └── styles.css                  # Main CSS file
+│
+├── templates/                      # HTML template files
+│   ├── a.txt                       # Placeholder or text file
+│   ├── about.html                  # About page
+│   ├── admin.html                  # Admin page
+│   ├── blog.html                   # Blog page
+│   ├── chart.html                  # Climate data chart page
+│   ├── green_technologies_2024.html
+│   ├── index.html                  # Home page
+│   ├── login.html                  # Login page
+│   ├── map.html                    # Map visualization page
+│   ├── register.html               # Registration page
+│   ├── sustainability.html         # Sustainability information page
+│   └── understanding_climate_change.html
+│
+├── app.py                          # Main Flask application file
+├── README.md                       # Project documentation
+└── requirements.txt                # List of dependencies

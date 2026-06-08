@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Climaview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Favicon link -->
+    <link rel="icon" href="static/favicon_io/favicon-16x16.png" type="image/png">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #1e1e1e;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+        }
+
+        header .title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff6f61;
+        }
+
+        header nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            margin: 0;
+        }
+
+        header nav ul li {
+            font-size: 1rem;
+        }
+
+        header nav ul li a {
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .container {
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 100px; /* Offset for fixed header */
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 18px;
+            color: #555555;
+            line-height: 1.6;
+            text-align: justify;
+            margin-bottom: 20px;
+        }
+
+        .team-info {
+            font-size: 20px;
+            font-weight: 500;
+            color: #007BFF;
+            text-align: center;
+        }
+
+        /* Centered Team Members' Names */
+        .team-members {
+            font-size: 18px;
+            color: #555555;
+            line-height: 1.6;
+            text-align: center;
+            margin-top: 20px;
+            max-width: fit-content;
+            margin-inline: auto;
+        }
+
+        .team-members p {
+            margin: 10px 0; /* Add space between names */
+            text-align: center;
+        }
+
+        footer {
+            background-color: #3a3f44;
+            color: #f0f0f0; /* Off-white color */
+            padding: 10px 0;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 400;
+            margin-top: auto; /* Ensures footer is at the bottom when content is scrolled */
+        }
+
+        footer p {
+            color: #f0f0f0;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        footer a {
+            color: #e1e1e0;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* General scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 12px; /* Set the width of the scrollbar */
+            height: 12px; /* Set the height of the horizontal scrollbar */
+        }
+
+        /* Track (background of the scrollbar) */
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e; /* Dark background for the scrollbar track */
+            border-radius: 10px; /* Rounded edges */
+        }
+
+        /* Thumb (scrollable portion) */
+        ::-webkit-scrollbar-thumb {
+            background: #ff6f61; /* Use Climaview's theme color */
+            border-radius: 10px; /* Rounded scrollbar thumb */
+            border: 3px solid #1e1e1e; /* Space between track and thumb */
+        }
+
+        /* Thumb hover effect */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff5a4d; /* Slightly lighter shade on hover */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="title">
+        Climaview
+    </div>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <h1>About the Project</h1>
+    <p>This web application provides interactive visualizations of global climate data from various cities around the
+        world. It allows users to explore and analyze CO2 levels and temperatures of different locations through an
+        interactive map. The goal of this project is to help users understand climate patterns and the relationship
+        between CO2 levels and global temperatures.</p>
+    <p>The data is fetched from a backend system that sources real-time information to provide accurate climate data.
+        This project was created as part of a climate awareness initiative.</p>
+    <p>We strive to make climate data accessible and engaging through a user-friendly interface and seamless
+        functionality.</p>
+    <p class="team-info">Created by Team "Climatelense"</p>
+
+    <!-- Team Members Information -->
+    <div class="team-members">
+        <p>Sevan S. Diyora</p>
+        <p>Jeelkumar D. Jiyani</p>
+        <p>Dhvani J. Dihora</p>
+        <p>Sai Charan Kyasa</p>
+        <p>Nitish Kumar</p>
+        <p><strong>Instructor:</strong> Dr. Hubert A. Johnson</p>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2024 Climaview. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

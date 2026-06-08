@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+
+<html>
+
+
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <title>Climate Intelligence Dashboard</title>
+
+    <style>
+        body {
+            background: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ff6f61;
+        }
+        
+        .section {
+            background: #1e1e1e;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        input,
+        select {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+        }
+        
+        button {
+            background: #ff6f61;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #252525;
+            padding: 15px;
+        }
+        
+        td {
+            padding: 15px;
+            text-align: center;
+        }
+        
+        tr:nth-child(even) {
+            background: #1a1a1a;
+        }
+        
+        .risk-card {
+            background: #252525;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 12px;
+        }
+        
+        .high-risk {
+            border-left: 6px solid #ff4444;
+        }
+        
+        .moderate-risk {
+            border-left: 6px solid #ffaa00;
+        }
+        
+        .low-risk {
+            border-left: 6px solid #4caf50;
+        }
+        
+        .insight-card {
+            background: #252525;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .insight-card h3 {
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        
+        .insight-card p {
+            color: #d9d9d9;
+            line-height: 1.6;
+        }
+        
+        #tempChart,
+        #humidityChart,
+        #pressureChart,
+        #riskChart {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .chart-card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .risk-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .insight-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: auto;
+        }
+        
+        input,
+        select {
+            background: #252525;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            min-width: 180px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="dashboard-container"></div>
+
+    <h1>🌍 Climate Intelligence Dashboard</h1>
+
+    <div class="section">
+
+        <h2>Select Cities</h2>
+
+        <div class="controls">
+
+            <input type="text" id="city1" value="New York" placeholder="City 1">
+
+            <input type="text" id="city2" placeholder="City 2">
+
+            <input type="text" id="city3" placeholder="City 3">
+
+        </div>
+
+        <br>
+
+        <h3>Or Choose From Favorites</h3>
+
+        <div class="controls">
+
+            <select id="favorite1">
+
+<option value="">Select City</option>
+
+{% for city in cities %}
+<option>{{ city[1] }}</option>
+{% endfor %}
+
+</select>
+
+            <select id="favorite2">
+
+<option value="">Select City</option>
+
+{% for city in cities %}
+<option>{{ city[1] }}</option>
+{% endfor %}
+
+</select>
+
+            <select id="favorite3">
+
+<option value="">Select City</option>
+
+{% for city in cities %}
+<option>{{ city[1] }}</option>
+{% endfor %}
+
+</select>
+
+            <button id="analyzeBtn">
+Analyze Cities
+</button>
+
+        </div>
+
+    </div>
+
+    <div class="section">
+
+        <h2>📊 Climate Comparison Results</h2>
+
+        <table id="resultsTable">
+
+            <thead>
+                <tr>
+                    <th>City</th>
+                    <th>Temperature</th>
+                    <th>Humidity</th>
+                    <th>Pressure</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <div class="section">
+
+        <div class="section">
+
+            <h2>📈 Climate Analytics</h2>
+
+            <div class="chart-grid">
+
+                <div class="chart-card">
+                    <div id="tempChart"></div>
+                </div>
+
+                <div class="chart-card">
+                    <div id="humidityChart"></div>
+                </div>
+
+                <div class="chart-card">
+                    <div id="pressureChart"></div>
+                </div>
+
+                <div class="chart-card">
+                    <div id="riskChart"></div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="section">
+
+        <h2>🌡 Climate Risk Assessment</h2>
+
+        <div id="riskContainer" class="risk-container">
+        </div>
+    </div>
+
+    <div class="section">
+
+        <h2>🤖 Climate Insights</h2>
+
+        <div id="insightContainer" class="insight-container">
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            document
+                .getElementById("analyzeBtn")
+                .addEventListener("click", analyzeCities);
+
+        });
+
+        async function analyzeCities() {
+
+            let cities = [];
+
+            const c1 = document.getElementById("city1").value;
+            const c2 = document.getElementById("city2").value;
+            const c3 = document.getElementById("city3").value;
+
+            const f1 = document.getElementById("favorite1").value;
+            const f2 = document.getElementById("favorite2").value;
+            const f3 = document.getElementById("favorite3").value;
+
+            [c1, c2, c3, f1, f2, f3].forEach(city => {
+
+                if (city && city.trim() !== "") {
+                    cities.push(city.trim());
+                }
+
+            });
+
+            cities = [...new Set(cities)];
+
+            if (cities.length === 0) {
+                alert("Please enter at least one city.");
+                return;
+            }
+
+            try {
+
+                let query = cities
+                    .map(city => `cities=${encodeURIComponent(city)}`)
+                    .join("&");
+
+                const response =
+                    await fetch(`/compare_data?${query}`);
+
+                const data =
+                    await response.json();
+
+                const tbody =
+                    document.querySelector("#resultsTable tbody");
+
+                const riskContainer =
+                    document.getElementById("riskContainer");
+
+                const insightContainer =
+                    document.getElementById("insightContainer");
+
+                tbody.innerHTML = "";
+                riskContainer.innerHTML = "";
+                insightContainer.innerHTML = "";
+
+                data.forEach(city => {
+
+                    tbody.innerHTML += `
+                <tr>
+                    <td>${city.city}</td>
+                    <td>${city.temperature} °C</td>
+                    <td>${city.humidity}%</td>
+                    <td>${city.pressure}</td>
+                </tr>
+            `;
+
+                    let cssClass = "low-risk";
+
+                    if (city.risk_status === "High Risk") {
+                        cssClass = "high-risk";
+                    } else if (city.risk_status === "Moderate Risk") {
+                        cssClass = "moderate-risk";
+                    }
+
+                    riskContainer.innerHTML += `
+                <div class="risk-card ${cssClass}">
+                    <h3>🌍 ${city.city}</h3>
+                    <h1>${city.risk_score}/100</h1>
+                    <p>${city.risk_status}</p>
+                </div>
+            `;
+
+                    insightContainer.innerHTML += `
+                <div class="insight-card">
+                    <h3>🤖 ${city.city}</h3>
+                    <p>${city.insight}</p>
+                </div>
+            `;
+
+                });
+
+                loadCharts(data);
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "Unable to fetch climate data. Please try again."
+                );
+
+            }
+
+        }
+
+        function loadCharts(data) {
+
+            const cityNames =
+                data.map(x => x.city);
+
+            const temperatures =
+                data.map(x => x.temperature);
+
+            const humidity =
+                data.map(x => x.humidity);
+
+            const pressure =
+                data.map(x => x.pressure);
+
+            const risk =
+                data.map(x => x.risk_score);
+
+            const commonLayout = {
+                height: 300,
+                paper_bgcolor: "#ffffff",
+                plot_bgcolor: "#ffffff",
+                margin: {
+                    l: 40,
+                    r: 20,
+                    t: 50,
+                    b: 40
+                }
+            };
+
+            Plotly.newPlot(
+                "tempChart", [{
+                    x: cityNames,
+                    y: temperatures,
+                    type: "bar"
+                }], {
+                    ...commonLayout,
+                    title: "🌡 Temperature Comparison"
+                }
+            );
+
+            Plotly.newPlot(
+                "humidityChart", [{
+                    x: cityNames,
+                    y: humidity,
+                    type: "bar"
+                }], {
+                    ...commonLayout,
+                    title: "💧 Humidity Comparison"
+                }
+            );
+
+            Plotly.newPlot(
+                "pressureChart", [{
+                    x: cityNames,
+                    y: pressure,
+                    type: "bar"
+                }], {
+                    ...commonLayout,
+                    title: "📈 Pressure Comparison"
+                }
+            );
+
+            Plotly.newPlot(
+                "riskChart", [{
+                    x: cityNames,
+                    y: risk,
+                    type: "bar"
+                }], {
+                    ...commonLayout,
+                    title: "🌍 Climate Risk Score"
+                }
+            );
+
+        }
+    </script>
+    </div>
+</body>
+
+
+</html>
